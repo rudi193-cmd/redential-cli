@@ -7,6 +7,12 @@ always bump at least minor; breaking schema changes bump major.
 
 ## [Unreleased]
 
+### Added
+- **New taxonomy slug: `ai/mcp` (Model Context Protocol).** `taxonomy.json`
+  1.5.1 → 1.6.0 (adding vocabulary = minor bump, per this file's own
+  precedent). Vocabulary-first: the slug lands before any signature
+  references it, per the repo's closed-vocabulary rule — a map entry or
+  signature naming a slug outside `taxonomy.json` fails at load time.
 ### Changed
 - **Bare-name alias packages published: `redential` and `redential-cli`.**
   Two thin launcher packages, `packages/redential/` and
