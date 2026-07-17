@@ -13,6 +13,23 @@ always bump at least minor; breaking schema changes bump major.
   precedent). Vocabulary-first: the slug lands before any signature
   references it, per the repo's closed-vocabulary rule — a map entry or
   signature naming a slug outside `taxonomy.json` fails at load time.
+- **Tier 1 detection for the Model Context Protocol SDKs.** 16 new
+  `signatures/package-map.json` entries mapping to `ai/mcp`: the official
+  TypeScript SDK (`@modelcontextprotocol/sdk` plus the 7 other published
+  `@modelcontextprotocol/*` library packages: `server`, `client`, `core`,
+  `node`, `express`, `hono`, `ext-apps`), the official Python SDK (import
+  root `mcp`), the `fastmcp` framework (one key serving both the npm and
+  PyPI packages of that name), the official Rust SDK (crate `rmcp`), the
+  official Go SDK (`github.com/modelcontextprotocol/go-sdk/mcp`) and the
+  dominant community Go SDK (`github.com/mark3labs/mcp-go/mcp` and
+  `.../server`, full-path keys per the `gorm.io/*` precedent), the
+  official Java SDK (`io.modelcontextprotocol`, a 2-segment org umbrella
+  like `org.springframework`), and the official C# SDK (namespace root
+  `modelcontextprotocol`, which also matches its `.csproj`
+  PackageReference). Covered by extractor unit tests
+  (`test/import-detect.test.ts`) and an end-to-end fixture-repo test
+  through the real `runScan` (`test/scan.test.ts`).
+
 ### Changed
 - **Bare-name alias packages published: `redential` and `redential-cli`.**
   Two thin launcher packages, `packages/redential/` and

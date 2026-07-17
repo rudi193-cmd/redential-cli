@@ -739,3 +739,40 @@ describe("runScan — multi-language fixture (Rust, Java, Kotlin, C#, Swift)", (
     );
   });
 });
+
+describe("runScan — Model Context Protocol fixture", () => {
+  it("detects ai/mcp end to end from real TypeScript and Python SDK imports", async () => {
+    const dir = repo();
+    const configDir = tempConfigDir();
+
+    commit(dir, {
+      message: "mcp: expose the repo as an MCP server (TS + Python)",
+      authorName: "Poly",
+      authorEmail: "poly@example.com",
+      files: {
+        "src/server.ts": [
+          'import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";',
+          "",
+          'const server = new McpServer({ name: "demo", version: "1.0.0" });',
+        ].join("\n"),
+        "tools/server.py": [
+          "from mcp.server.fastmcp import FastMCP",
+          "",
+          'mcp = FastMCP("demo")',
+        ].join("\n"),
+      },
+    });
+
+    const bundle = await runScan({
+      repoPath: dir,
+      authors: ["poly@example.com"],
+      confirmed: true,
+      toolVersion: "0.1.0",
+      configDir,
+    });
+
+    const slugs = bundle.detected_skills.map((s) => s.slug);
+    expect(slugs).toContain("ai/mcp");
+    expect(validateAgainstSchema(schema, bundle)).toEqual([]);
+  });
+});

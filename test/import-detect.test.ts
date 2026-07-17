@@ -388,3 +388,60 @@ describe("extractImportedPackages — Swift", () => {
     expect(extractImportedPackages(diff, "Package.swift")).toEqual(["rxswift"]);
   });
 });
+
+describe("extractImportedPackages — Model Context Protocol SDKs", () => {
+  it("extracts the TypeScript SDK's scoped import, normalized to scope+package across a deep subpath", () => {
+    expect(
+      extractImportedPackages('import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";', "server.ts")
+    ).toEqual(["@modelcontextprotocol/sdk"]);
+  });
+
+  it("extracts the Python SDK's from-import, normalized to its first dot segment", () => {
+    expect(extractImportedPackages("from mcp.server.fastmcp import FastMCP", "server.py")).toEqual(["mcp"]);
+  });
+
+  it("extracts the FastMCP framework import in both Python forms", () => {
+    expect(extractImportedPackages("import fastmcp", "server.py")).toEqual(["fastmcp"]);
+    expect(extractImportedPackages("from fastmcp import FastMCP", "server.py")).toEqual(["fastmcp"]);
+  });
+
+  it("extracts the Rust SDK crate (rmcp) from a use statement", () => {
+    expect(extractImportedPackages("use rmcp::ServiceExt;", "src/main.rs")).toEqual(["rmcp"]);
+  });
+
+  it("extracts the Go SDKs' full version-stripped import paths", () => {
+    expect(extractImportedPackages('import "github.com/modelcontextprotocol/go-sdk/mcp"', "main.go")).toEqual([
+      "github.com/modelcontextprotocol/go-sdk/mcp",
+    ]);
+    const diff = 'import (\n\t"github.com/mark3labs/mcp-go/mcp"\n\t"github.com/mark3labs/mcp-go/server"\n)';
+    expect(extractImportedPackages(diff, "main.go")).toEqual([
+      "github.com/mark3labs/mcp-go/mcp",
+      "github.com/mark3labs/mcp-go/server",
+    ]);
+  });
+
+  it("extracts the Java SDK at its 2-segment org root (io.modelcontextprotocol)", () => {
+    expect(
+      extractImportedPackages("import io.modelcontextprotocol.client.McpClient;", "Client.java")
+    ).toContain("io.modelcontextprotocol");
+  });
+
+  it("extracts the C# SDK's namespace root, lowercased at depth 1", () => {
+    expect(extractImportedPackages("using ModelContextProtocol.Server;", "Server.cs")).toContain(
+      "modelcontextprotocol"
+    );
+  });
+
+  it("does not match an MCP import inside a // comment", () => {
+    expect(
+      extractImportedPackages(
+        '// import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";',
+        "server.ts"
+      )
+    ).toEqual([]);
+  });
+
+  it("does not match MCP import-shaped text inside a string literal", () => {
+    expect(extractImportedPackages('doc = "from mcp.server.fastmcp import FastMCP"', "notes.py")).toEqual([]);
+  });
+});
